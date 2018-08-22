@@ -33,7 +33,7 @@
 static NSString *const RCTMapViewKey = @"MapView";
 
 
-@interface AIRGoogleMapManager() <GMSMapViewDelegate, GMSIndoorDisplayDelegate>
+@interface AIRGoogleMapManager() <GMSMapViewDelegate>
 {
   BOOL didCallOnMapReady;
 }
@@ -591,7 +591,7 @@ RCT_EXPORT_METHOD(setIndoorActiveLevelIndex:(nonnull NSNumber *)reactTag
       return;
     }
     self.map.onIndoorBuildingFocused(@{
-                                      @"IndoorBuilding": @{
+                                      @"indoorBuilding": @{
                                           @"activeLevelIndex": @0,
                                           @"underground": @false,
                                           @"levels": [[NSMutableArray alloc]init]

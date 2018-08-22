@@ -1,6 +1,14 @@
 import React from 'react';
-import { StyleSheet, View, Dimensions, Button, Alert } from 'react-native';
-import MapView from 'react-native-maps';
+import {
+  StyleSheet,
+  View,
+  Dimensions,
+  Button,
+  Alert,
+} from 'react-native';
+ import MapView from 'react-native-maps';
+ const { width, height } = Dimensions.get('window');
+ const ASPECT_RATIO = width / height;
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
@@ -8,6 +16,7 @@ const LATITUDE = 1.3039991;
 const LONGITUDE = 103.8316911;
 const LATITUDE_DELTA = 0.003;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
+ class IndoorMap extends React.Component {
 
 class IndoorMap extends React.Component {
   constructor(props) {
@@ -25,8 +34,7 @@ class IndoorMap extends React.Component {
       msg
     );
   }
-
-  setIndoorLevel(level) {
+   setIndoorLevel(level) {
     this.map.setIndoorActiveLevelIndex(level);
   }
 
@@ -53,6 +61,10 @@ class IndoorMap extends React.Component {
     );
   }
 }
+ IndoorMap.propTypes = {
+  provider: MapView.ProviderPropType,
+};
+ const styles = StyleSheet.create({
 
 IndoorMap.propTypes = {
   provider: MapView.ProviderPropType,
