@@ -115,7 +115,7 @@ RCT_CUSTOM_VIEW_PROPERTY(initialRegion, MKCoordinateRegion, AIRMap)
 RCT_CUSTOM_VIEW_PROPERTY(initialCamera, MKMapCamera, AIRMap)
 {
     if (json == nil) return;
-    
+
     // don't emit region change events when we are setting the initialCamera
     BOOL originalIgnore = view.ignoreRegionChanges;
     view.ignoreRegionChanges = YES;
@@ -142,7 +142,7 @@ RCT_CUSTOM_VIEW_PROPERTY(region, MKCoordinateRegion, AIRMap)
 RCT_CUSTOM_VIEW_PROPERTY(camera, MKMapCamera*, AIRMap)
 {
     if (json == nil) return;
-    
+
     // don't emit region change events when we are setting the camera
     BOOL originalIgnore = view.ignoreRegionChanges;
     view.ignoreRegionChanges = YES;
@@ -395,7 +395,12 @@ RCT_EXPORT_METHOD(fitToSuppliedMarkers:(nonnull NSNumber *)reactTag
 
             NSArray *filteredMarkers = [mapView.annotations filteredArrayUsingPredicate:filterMarkers];
 
-            [mapView showAnnotations:filteredMarkers animated:animated];
+            CGFloat top = [RCTConvert CGFloat:edgePadding[@"top"]];
+            CGFloat right = [RCTConvert CGFloat:edgePadding[@"right"]];
+            CGFloat bottom = [RCTConvert CGFloat:edgePadding[@"bottom"]];
+            CGFloat left = [RCTConvert CGFloat:edgePadding[@"left"]];
+
+            [mapView showAnnotations:filteredMarkers edgePadding:UIEdgeInsetsMake(top, left, bottom, right) animated:animated];
 
         }
     }];
@@ -486,7 +491,7 @@ RCT_EXPORT_METHOD(pointForCoordinate:(nonnull NSNumber *)reactTag
                                                              [coordinate[@"longitude"] doubleValue]
                                                              )
                                               toPointToView:mapView];
-
+            
             resolve(@{
                       @"x": @(touchPoint.x),
                       @"y": @(touchPoint.y),
@@ -512,7 +517,7 @@ RCT_EXPORT_METHOD(coordinateForPoint:(nonnull NSNumber *)reactTag
                                                              [point[@"y"] doubleValue]
                                                              )
                                                  toCoordinateFromView:mapView];
-
+            
             resolve(@{
                       @"latitude": @(coordinate.latitude),
                       @"longitude": @(coordinate.longitude),
@@ -662,7 +667,7 @@ RCT_EXPORT_METHOD(coordinateForPoint:(nonnull NSNumber *)reactTag
                 }
             }
         }
-
+        
         if ([overlay isKindOfClass:[AIRMapOverlay class]]) {
             AIRMapOverlay *imageOverlay = (AIRMapOverlay*) overlay;
             if (MKMapRectContainsPoint(imageOverlay.boundingMapRect, mapPoint)) {
