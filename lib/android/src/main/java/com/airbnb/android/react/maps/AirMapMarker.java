@@ -8,7 +8,11 @@ import android.graphics.Color;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.support.v4.util.LruCache;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.animation.ObjectAnimator;
 import android.util.Property;
@@ -39,6 +43,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import javax.annotation.Nullable;
+
+import static com.airbnb.android.react.maps.AirMapManager.addBitmapToMemoryCache;
+import static com.airbnb.android.react.maps.AirMapManager.getBitmapFromMemCache;
+
 
 public class AirMapMarker extends AirMapFeature {
 
@@ -334,17 +342,25 @@ public class AirMapMarker extends AirMapFeature {
           .build();
       logoHolder.setController(controller);
     } else {
-      iconBitmapDescriptor = getBitmapDescriptorByName(uri);
-      if (iconBitmapDescriptor != null) {
+      iconBitmap = getBitmapFromMemCache(uri);
+      if (iconBitmap != null){
+        iconBitmapDescriptor = getBitmapDescriptorByName(uri);
+        iconBitmap = iconBitmap.copy(iconBitmap.getConfig(), false);
+      } else {
+        iconBitmapDescriptor = getBitmapDescriptorByName(uri);
+        if (iconBitmapDescriptor != null) {
           int drawableId = getDrawableResourceByName(uri);
           iconBitmap = BitmapFactory.decodeResource(getResources(), drawableId);
           if (iconBitmap == null) { // VectorDrawable or similar
-              Drawable drawable = getResources().getDrawable(drawableId);
-              iconBitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-              drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-              Canvas canvas = new Canvas(iconBitmap);
-              drawable.draw(canvas);
+            Drawable drawable = getResources().getDrawable(drawableId);
+            iconBitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+            Canvas canvas = new Canvas(iconBitmap);
+            drawable.draw(canvas);
+          } else {
+            addBitmapToMemoryCache(uri, iconBitmap);
           }
+        }
       }
       update(true);
     }
