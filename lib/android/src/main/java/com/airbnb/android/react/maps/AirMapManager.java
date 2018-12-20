@@ -62,11 +62,29 @@ public class AirMapManager extends ViewGroupManager<AirMapView> {
 
   public static void addBitmapToMemoryCache(String key, Bitmap bitmap) {
     if (getBitmapFromMemCache(key) == null) {
+      prepareCache();
       mMemoryCache.put(key, bitmap);
     }
   }
+  private static void prepareCache(){
+    if (mMemoryCache == null){
+      final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
 
+      // Use 1/8th of the available memory for this memory cache.
+      final int cacheSize = maxMemory / 8;
+
+      mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+        @Override
+        protected int sizeOf(String key, Bitmap bitmap) {
+          // The cache size will be measured in kilobytes rather than
+          // number of items.
+          return bitmap.getByteCount() / 1024;
+        }
+      };
+    }
+  }
   public static Bitmap getBitmapFromMemCache(String key) {
+    prepareCache();
     return mMemoryCache.get(key);
   }
 
@@ -82,19 +100,7 @@ public class AirMapManager extends ViewGroupManager<AirMapView> {
 
   @Override
   protected AirMapView createViewInstance(ThemedReactContext context) {
-    final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-
-    // Use 1/8th of the available memory for this memory cache.
-    final int cacheSize = maxMemory / 8;
-
-    mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
-      @Override
-      protected int sizeOf(String key, Bitmap bitmap) {
-        // The cache size will be measured in kilobytes rather than
-        // number of items.
-        return bitmap.getByteCount() / 1024;
-      }
-    };
+    prepareCache();
     return new AirMapView(context, this.appContext, this, googleMapOptions);
   }
 
